@@ -78,7 +78,7 @@ class Reluplex : public IReluplex
 public:
     /*** Add by lzs **/
     bool stopFind;  // Add by lzs
-    double *_assignment;	//数组，存储所有变量的相应值
+    double *_assignment;
     int *candidateNode;
 
     /*** Add end **/
@@ -109,18 +109,18 @@ public:
             :   stopFind(false)
             , _assignment( NULL )
             ,candidateNode(NULL)
-            ,_numVariables( numVariables )	//所有变量的总数
+            ,_numVariables( numVariables )
             , _reluplexName( reluplexName )	//
             , _finalOutputFile( finalOutputFile )
             , _finalStatus( NOT_DONE )
             , _wasInitialized( false )
             , _tableau( numVariables )
             , _preprocessedTableau( numVariables )
-            , _upperBounds( NULL )	// 所有和bounds和assignment有关的变量，都是数组，存储所有变量的上下界和赋值
+            , _upperBounds( NULL )
             , _lowerBounds( NULL )
             , _preprocessedUpperBounds( NULL )
             , _preprocessedLowerBounds( NULL )
-            , _preprocessedAssignment( NULL )// 所有和bounds和assignment有关的变量，都是数组，存储所有变量的上下界和赋值
+            , _preprocessedAssignment( NULL )
             , _smtCore( this, _numVariables )
             , _useApproximations( true )
             , _findAllPivotCandidates( false )
@@ -265,18 +265,18 @@ public:
 
     void initialize()
     {
-        // 检查所有变量的上下界是否是合理值（上界大于下界）
-        // 以及非基变量non-basic是否在上下界之内
 
-        //（此时的non-basic是所有具有真实意义的值，因为此时没有经过pivot，所有人工变量都是basic）
-        // 如果non-baisc有越界值，要更新值使非基变量non-basic在上下界内，（即使使basic越界也无所谓
-        // 如果被update的值是relu中的一个，要立即考虑是否需要fix，如果需要，立即在update中用updateB或updateF来进行fix
+
+
+
+
+
 
         /*** make all non-baisc in their bounds ***/
-        // 将现阶段所有的non-basic都update到上下界之内，没有执行过Pivot
+
         initialUpdate();
 
-        // 处理无穷大变量，以及non-basic的上下界tighter
+
         makeAllBoundsFinite();
 
         _wasInitialized = true;
@@ -406,14 +406,14 @@ public:
         try
         {
             /*** first step*****/
-            // 处理non-basic变量的越界问题，以及对无穷界限进行缩小
+
             if ( !_wasInitialized )
                 initialize();
 
             countVarsWithInfiniteBounds();
 
             /*** second step*****/
-            // 消除所有另外引入的辅助变量,即所有basic变量，即使只有一个无法消除，也会使整个项目failed
+
             if ( !eliminateAuxVariables() )
             {
                 _finalStatus = Reluplex::ERROR;
@@ -430,10 +430,10 @@ public:
 
 
             /** third step*****/
-            // 保存一些需要的数据，如initialize后的Tableau、全文只在这里有调用
+
             storePreprocessedMatrix();
 
-            // 打印信息和存入Log
+
             printf( "Initialization steps over.\n" );
             printf("\n----- printStatistics():after initialize() ----\n");
             printStatistics();
@@ -446,14 +446,14 @@ public:
             {
                 computeVariableStatus();
                 /** fifth step*****/
-                // 如果满足这两个条件，则返回SAT
+
                 if ( allVarsWithinBounds() && allRelusHold() )
                 {
-                    //// add by lzs : 在满足条件的时候进行一次判断，要求Basic里面没有只有本身为-1的情况，否则这样的情况就算满足条件，也一般不满足，所以要去除，回退上一步
+
                     if (checkIfJustItself()) {
                         _smtCore.pop();
-                        setMinStackSecondPhase( _currentStackDepth );   // 模仿原代码
-                        continue;   // 还原上一步之后，要跳过后面的代码，继续循环
+                        setMinStackSecondPhase( _currentStackDepth );
+                        continue;
                     }
                     //// add end
 
@@ -471,18 +471,18 @@ public:
                     Map<unsigned, unsigned> indexToVar;
                     /******** change! **********/
                     // cto
-//                    unsigned inputLayerSize = 18;   // 输入层有多少个元素
-//                    unsigned outputLayerSize = 3;   // 输出层有多少个元素
-//                    unsigned baseOutputIndex = 234; // 输出层第一个元素的下标
+
+
+
                     // cto end
 
                     // leaky_example_new
-                    unsigned inputLayerSize = 1;   // 输入层有多少个元素
-                    unsigned outputLayerSize = 1;   // 输出层有多少个元素
-                    unsigned baseOutputIndex = 5; // 输出层第一个元素的下标
+                    unsigned inputLayerSize = 1;
+                    unsigned outputLayerSize = 1;
+                    unsigned baseOutputIndex = 5;
                     // leaky_example_new end
 
-                    // 其实以后只需要改上面的参数就好
+
                     for (unsigned ipt = 0; ipt < inputLayerSize; ipt++) {
                         indexToVar[ipt] = ipt;
                     }
@@ -494,11 +494,11 @@ public:
                     for (unsigned c = 0; c < num_Node; c++) {
                         currentAdversaryE[num_AE][c] = _assignment[ indexToVar[c] ];
                     }
-                    num_AE ++;  //表示当前找到的个数，也表示下一个应该存储的下标值
+                    num_AE ++;
 
                     printf("printCurrentAE in solve()'s main loop:\n");
-//                    for (unsigned j = 0; j < num_AE; ++j) {   // 输出AE数组里的全部内容
-                    for (unsigned j = num_AE - 1; j < num_AE; ++j) {     //简便输出，只输出最近找到的一个
+
+                    for (unsigned j = num_AE - 1; j < num_AE; ++j) {
                         printf("This is a adversial example: %u \n", num_AE);
                         for (unsigned k = 0; k < num_Node; ++k) {
                             if( k < inputLayerSize){
@@ -512,7 +512,7 @@ public:
                     if (num_AE < num_Expected_AE){
                         printf("\nWe find a AE, but will run continuely: %u \n",num_AE);
                         _smtCore.pop();
-                        setMinStackSecondPhase( _currentStackDepth );   // 模仿原代码
+                        setMinStackSecondPhase( _currentStackDepth );
                         printf("After pop(), current assignment is : \n");
                         for (unsigned c = 0; c < num_Node; c++) {
                             if(c < inputLayerSize){  //
@@ -528,26 +528,26 @@ public:
                     }
                     /*** add end ***/
                 }
-                // violatingLevelInStack默认初始化为0，表示导致violation进行了多少次split,而smtCore需要根据这个值重做多少次decisions
+
                 unsigned violatingLevelInStack;
 
-                // 否则，还有越界的basic变量，或者broken的relu，就调用process继续处理
-                // 如果处理成功，表明进行了一次值的更新，返回true,进行下一次循环
 
-                // 如果处理不成功，返回false
-                // 可能导致返回false的情况：1、GLPK没有找到解决方案NO_SOLUTION_EXISTS
-                // 2、出现异常
-                // 3、fix越界变量时没有找到可以Pivot的候选者
 
-                // 此时调用smtScore，根据_useConflictAnalysis，对栈进行pop一次或者多次，pop之后之前的状态直接就还原进入了_reluplex对象
-                // 进入下一次循环，继续处理
 
-                //// 每次progress可能是用GLPK进行一次fix越界变量，或者是用update-b-f更新有问题的pair，或者是用smtCore进行split,并记录状态在stack中
+
+
+
+
+
+
+
+
+
 
                 if ( !progress( violatingLevelInStack ) )
                 {
-                    // 如果需要进行冲突处理，则调用_smtCore, default value is true
-                    // violatingLevelInStack的值是刚进入progress时的_currentStackDepth，
+
+
 
                     if ( _useConflictAnalysis )
                         _smtCore.pop( violatingLevelInStack );  // if has conflict Analysis, it will go back several steps
@@ -557,8 +557,8 @@ public:
                     setMinStackSecondPhase( _currentStackDepth );
                 }
 
-                // 如果progress处理成功，返回true,可能是SOLVER_FAILED，也可能是SOLVER_FOUND，
-                // 进入下个循环
+
+
 
             }
         }
@@ -644,9 +644,9 @@ public:
             ++_numCallsToProgress;
 
             // The default
-            violatingLevelInStack = _currentStackDepth;  //堆栈深度，进行了多少次split
+            violatingLevelInStack = _currentStackDepth;
 
-            // _useDegradationChecking不知道什么鬼，默认为false,先不管
+
             if ( _useDegradationChecking && ( _numCallsToProgress % 50 == 0 ) )
             {
                 double currentMaxDegradation = checkDegradation();
@@ -657,11 +657,11 @@ public:
                 }
             }
 
-            // 每调用500次进行一次数据打印
+
             if ( _numCallsToProgress % PRINT_STATISTICS == 0 )
                 printStatistics();
 
-            // 每500次打印赋值
+
             if ( _printAssignment && _numCallsToProgress % PRINT_ASSIGNMENT == 0 )
                 printAssignment();
 
@@ -670,7 +670,7 @@ public:
             /********以下开始papaer中所写**********/
 
             List<unsigned> outOfBoundVariables;
-            findOutOfBounds( outOfBoundVariables ); //在basic中找到越界变量，存入List中
+            findOutOfBounds( outOfBoundVariables );
 
             // If we have out-of-bounds variables, we deal with them first
             if ( !outOfBoundVariables.empty() )
@@ -680,26 +680,26 @@ public:
 
                 GlpkWrapper::GlpkAnswer answer = fixOutOfBounds();
 
-                // _consecutiveGlpkFailureCount用于记录GLPK Failures的次数=10，如果大于，则报错
+
                 if ( _consecutiveGlpkFailureCount > MAX_GLPK_FAILURES_BEFORE_RESOTRATION )
                 {
                     printf( "Error: %u Consecutive GLPK failures\n", MAX_GLPK_FAILURES_BEFORE_RESOTRATION );
                     throw Error( Error::CONSECUTIVE_GLPK_FAILURES );
                 }
 
-                // 如果返回 NO_SOLUTION_EXISTS，表示没有找到解决方案
+
                 if ( answer == GlpkWrapper::NO_SOLUTION_EXISTS )
                     return false;
 
-                // 如果返回 SOLVER_FAILED，表示本次解决失败，回溯到之前的步骤再解决
+
                 if ( answer == GlpkWrapper::SOLVER_FAILED )
                 {
                     // In this case, we restored from the original tableau; nothing left to do here.
                     return true;
                 }
 
-                //// 如果返回值非以上两种，则只可能是 SOLUTION_FOUND，表示找到了解决方案
-                // 此时如果没有broken的ReluPair，则直接返回true
+
+
                 if ( allRelusHold() ){
 //                    printf("\n~~~~~after glpk and all the relu hold\n");
                     return true;
@@ -738,7 +738,7 @@ public:
                 return true;
             }
 
-            //// 没有越界变量，就要查看是否有broken的pair
+
             // Reset the GLPK failure measures
             _consecutiveGlpkFailureCount = 0;
             _previousGlpkAnswer = GlpkWrapper::SOLUTION_FOUND;
@@ -752,20 +752,20 @@ public:
             _totalNumBrokenRelues += brokenRelus.size();
 
             unsigned brokenReluVar = *brokenRelus.begin();
-            // 找到broken的ReluPair中的forward变量
+
             unsigned f = _reluPairs.isF( brokenReluVar ) ? brokenReluVar : _reluPairs.toPartner( brokenReluVar );
 
-            //// notifyBrokenRelu()如果返回true,表示update-f或update-b已经超过阈值，在notifyBrokenRelu中进行了split，并将状态存入栈中
+
             if ( _smtCore.notifyBrokenRelu( f ) ){
-//                return true; // Splitting/Merging is a form of progress,进行过split，直接返回true，以便进入下一次progress循环
-                // return false表示在split负数的过程中找不到合适的candidate，已有的系数和leakyRatio不一致，需要回退这一次split
 
 
-                // return true表示split成功，可以进行后续的正常求解
+
+
+
             }
 
-            //// 否则，若是notifyBrokenRelu返回false，表示此时还不需要进行split，可以继续用update-f-b来进行修复pair
-            return fixBrokenRelu( f );// fix完成一次，返回true
+
+            return fixBrokenRelu( f );
         }
 
         catch ( const InvariantViolationError &e )
@@ -800,9 +800,9 @@ public:
             ++_numCallsToProgress;
 
             // The default
-            violatingLevelInStack = _currentStackDepth;	//堆栈深度，进行了多少次split
+            violatingLevelInStack = _currentStackDepth;
 
-            // _useDegradationChecking不知道什么鬼，默认为false,先不管
+
             if ( _useDegradationChecking && ( _numCallsToProgress % 50 == 0 ) )
             {
                 double currentMaxDegradation = checkDegradation();
@@ -813,12 +813,12 @@ public:
                 }
             }
 
-            // 每调用500次进行一次数据打印
+
             if ( _numCallsToProgress % PRINT_STATISTICS == 0 ){
                 printf("\n----- printStatistics():500 ----\n");
                 printStatistics();
             }
-            // 每500次打印赋值
+
             if ( _printAssignment && _numCallsToProgress % PRINT_ASSIGNMENT == 0 )
                 printAssignment();
 
@@ -827,7 +827,7 @@ public:
             /********以下开始papaer中所写**********/
 
             List<unsigned> outOfBoundVariables;
-            findOutOfBounds( outOfBoundVariables );	//在basic中找到越界变量，存入List中
+            findOutOfBounds( outOfBoundVariables );
 
             // If we have out-of-bounds variables, we deal with them first
             if ( !outOfBoundVariables.empty() )
@@ -836,26 +836,26 @@ public:
 
                 GlpkWrapper::GlpkAnswer answer = fixOutOfBounds();
 
-                // _consecutiveGlpkFailureCount用于记录GLPK Failures的次数=10，如果大于，则报错
+
                 if ( _consecutiveGlpkFailureCount > MAX_GLPK_FAILURES_BEFORE_RESOTRATION )
                 {
                     printf( "Error: %u Consecutive GLPK failures\n", MAX_GLPK_FAILURES_BEFORE_RESOTRATION );
                     throw Error( Error::CONSECUTIVE_GLPK_FAILURES );
                 }
 
-                // 如果返回 NO_SOLUTION_EXISTS，表示没有找到解决方案
+
                 if ( answer == GlpkWrapper::NO_SOLUTION_EXISTS )
                     return false;
 
-                // 如果返回 SOLVER_FAILED，表示本次解决失败，回溯到之前的步骤再解决
+
                 if ( answer == GlpkWrapper::SOLVER_FAILED )
                 {
                     // In this case, we restored from the original tableau; nothing left to do here.
                     return true;
                 }
 
-                //// 如果返回值非以上两种，则只可能是 SOLUTION_FOUND，表示找到了解决方案
-                // 此时如果没有broken的ReluPair，则直接返回true
+
+
                 if ( allRelusHold() )
                     return true;
 
@@ -892,7 +892,7 @@ public:
                 return true;
             }
 
-            //// 没有越界变量，就要查看是否有broken的pair
+
 
             // Reset the GLPK failure measures
             _consecutiveGlpkFailureCount = 0;
@@ -903,19 +903,19 @@ public:
             // If we got here, either there are no OOB variables, or they were fixed without changing the tableau
             // and we still have broken relus. Split on one of them.
             List<unsigned> brokenRelus;
-            findBrokenRelues( brokenRelus );    // 找到broken的ReLU Pair，存储在broeknRelus列表中
+            findBrokenRelues( brokenRelus );
             _totalNumBrokenRelues += brokenRelus.size();
 
             unsigned brokenReluVar = *brokenRelus.begin();
-            // 找到broken的ReluPair中的forward变量
+
             unsigned f = _reluPairs.isF( brokenReluVar ) ? brokenReluVar : _reluPairs.toPartner( brokenReluVar );
 
-            //// notifyBrokenRelu()如果返回true,表示update-f或update-b已经超过阈值，在notifyBrokenRelu中进行了split，并将状态存入栈中
-            if ( _smtCore.notifyBrokenRelu( f ) )
-                return true; // Splitting/Merging is a form of progress，已进行过split，直接返回true，以便进入下一次progress循环
 
-            //// 否则，若是notifyBrokenRelu返回false，表示此时还不需要进行split，可以继续用update-f-b来进行修复pair
-            return fixBrokenRelu( f );  // fix完成一次，返回true
+            if ( _smtCore.notifyBrokenRelu( f ) )
+                return true;
+
+
+            return fixBrokenRelu( f );
         }
 
         catch ( const InvariantViolationError &e )
@@ -963,7 +963,7 @@ public:
     {
         // Only basic variables can be out-of-bounds
 
-        // 在运算过程中所有的non-basic都是在界限范围内的，所以现在只需要检查basic，如果都在界限范围内，那么就意味着所有变量都在范围内了
+
 
         for ( auto i : _basicVariables )
             if ( outOfBounds( i ) )
@@ -1004,15 +1004,15 @@ public:
         double bVal = _assignment[b];
         double fVal = _assignment[f];
 
-//        // 当forward变量是0,但backward变量不是0时，返回true表示broken
+
 //        if (FloatUtils::isZero(fVal) && (!FloatUtils::isZero(bVal))) {
 //            return true;
 //        }
-//        // 当forward变量是正数，但与backward变量不相等时，返回true表示broken
+
 //        else if (FloatUtils::isPositive(fVal) && (FloatUtils::areDisequal(fVal, bVal))) {
 //            return true;
 //        }
-//        // 当forward变量是负数，但与backward变量*leakyRatio不相等时，返回true表示broken
+
 //        else if ( !FloatUtils::isPositive(fVal) && (FloatUtils::areDisequal(fVal, leakyRatio * bVal))) {
 //            return true;
 //        }
@@ -1027,8 +1027,8 @@ public:
         double bVal = _assignment[b];
         double fVal = _assignment[f];
 
-        // 当forward变量是0,但backward变量是正数时，返回true表示broken
-        // 当forward变量是正数，但与backward变量不相等时，返回true表示broken
+
+
 
         return
                 ( FloatUtils::isZero( fVal ) && FloatUtils::isPositive( bVal ) ) ||
@@ -2022,20 +2022,20 @@ public:
 
     bool boundInvariantHolds( unsigned variable, unsigned &violatingStackLevel )
     {
-        //判断已设定的上下界值是否是合理的，即lowerBounds要小于等于upperBounds，
-        //如果其中一边为无穷大，由于无穷大是无法比较的，则默认都为true
+
+
 
         if ( !_upperBounds[variable].finite() || !_lowerBounds[variable].finite() )
             return true;
 
-        // 如果不是，并返回false，由调用函数抛出异常
+
         if ( !FloatUtils::lte( _lowerBounds[variable].getBound(), _upperBounds[variable].getBound() ) )
         {
             violatingStackLevel = std::max( _lowerBounds[variable].getLevel(), _upperBounds[variable].getLevel() );
             return false;
         }
 
-        // 其他所有情况都返回true
+
         return true;
     }
 
@@ -2054,7 +2054,7 @@ public:
 
         unsigned partner = 0, b = 0, f = 0;
 
-        // 如果是relu变量，则取出它以及相关的b或f
+
         if ( _reluPairs.isRelu( variable ) )
         {
             // The variable is relu.
@@ -2063,17 +2063,17 @@ public:
             b = _reluPairs.isB( variable ) ? variable : partner;
         }
 
-        // 如果不是relu变量，或者relu变量的f已经被消除
+
         if ( !_reluPairs.isRelu( variable ) || _dissolvedReluVariables.exists( f ) )
         {
             // For non-relus, we can just update the bound.
-            // 直接更新上界为传入的bound值
+
             _upperBounds[variable].setBound( bound );
             _upperBounds[variable].setLevel( level );
 
             unsigned violatingStackLevel;
 
-            // 判断上下界是否是符合常理的
+
             if ( !boundInvariantHolds( variable, violatingStackLevel ) )
                 throw InvariantViolationError( violatingStackLevel );
 
@@ -2081,7 +2081,7 @@ public:
 
             // If the variable is basic, it's okay if it's out of bounds.
             // If non-basic and out of bounds, need to update.
-            // 如果更新了界限范围的是一个non-basic，且越界了，那么就要将其值修正为这个界限值（由于update可以接受的delta可为正负数，则这里可以直接用bound - _assignment[variable]
+
             if ( !_basicVariables.exists( variable ) && outOfBounds( variable ) )
                 update( variable, bound - _assignment[variable] );
 
@@ -2101,7 +2101,7 @@ public:
             }
         }
 
-        // 如果上界是正数，更新上界，如果越界，也是更新为正数
+
         // If the bound is positive, update bounds on both F and B.
         if ( FloatUtils::isPositive( bound ) )
         {
@@ -2130,8 +2130,8 @@ public:
         {
 //            printf("\nDo a split~~~~\n");
 
-            // 如果上界是0或负数，就可以假设已经求解了这个f，并设置
-            // 此时如果越界，也是更新为上界（负数），那么就是要乘以ratio
+
+
 //            printf( "enter updateUpperBound---- upperBound is zero or negative\n" );
 
 //            _upperBounds[variable].setBound( bound );
@@ -2139,13 +2139,13 @@ public:
 //            _upperBounds[partner].setBound( bound );
 //            _upperBounds[partner].setLevel( level );
 
-            // 仅仅是更新界限
-            if (_reluPairs.isF(variable)) {     // 如果要更新的界限是f的，那么b就是 （ 1 / leakyRatio）* bound
+
+            if (_reluPairs.isF(variable)) {
                 _upperBounds[variable].setBound( bound );
                 _upperBounds[variable].setLevel( level );
                 _upperBounds[partner].setBound( (1 / getLeakyValue()) * bound );
                 _upperBounds[partner].setLevel( level );
-            } else{ // 如果要更新的界限是b的，那么f的就是 leakyRatio * bound
+            } else{
                 _upperBounds[variable].setBound( bound );
                 _upperBounds[variable].setLevel( level );
                 _upperBounds[partner].setBound( getLeakyValue() * bound );
@@ -2154,7 +2154,7 @@ public:
 
             /*****  上界为负数，则取值一定是负数，既然要mark为resolved，那么就要连同assignment一起改变，还要添加新的约束 *****/
 
-            // 将要更新的值设置为非基变量，因为如果是基变量，就不会更新联动的值，第二个参数表示禁止将其设置为pivot的候选对象
+
             if ( _basicVariables.exists( b ) )
             {
 //                printf("~~~~~Before add split restrain, the b is basic , so need to change to non-basic\n");
@@ -2166,11 +2166,11 @@ public:
                 makeNonBasic( f, b );
             }
             dump();
-            // b和f在整个运算过程中应该都存在，除非是dissolve，此时如果出现这种情况，是进入不到这里来的，但如果存在，就报错
+
             if (_tableau.activeColumn(b) && _tableau.activeColumn(f)) {
                 _tableau.eraseRow(f);
                 _tableau.replaceNonBasicWithAnotherNonBasic(f, b, getLeakyValue());
-//                deleteIfJustItself();  //上面一行有过tableau的合并，可能会导致某些var的行只有它自己，跟其他变量不再有关系，所以要检测，删除这样的行
+
                 _tableau.addEntry(f, b, getLeakyValue());
                 _tableau.addEntry(f, f, -1);
                 markBasic(f);
@@ -2179,20 +2179,20 @@ public:
             }
 //            printf("~~~~~After add new restrain");
             dump();
-            // 将b设置为与f匹配的值，如果越界，后面会处理
+
             update( b, ( 1 /getLeakyValue() ) * _assignment[f] - _assignment[b], true );
 
             /***** 修复可能出现的错误值 ****/
-            // 更新完之后，与b相关联的行的赋值，可能会出现错误，此时要以b为标准，进行值的修复
+
             for (unsigned row = 0; row < _tableau.getNumVars(); row++) {
-                // 如果系数不为0，则b在这一行有出现过，重新计算这一行的值
+
 //                if ( (row != f) && (!FloatUtils::areEqual(_tableau.getCell(row, b), 0.0)) ){
-                // 注意：这里重新赋值是包括f那一行，因为在update b与f一致的过程中，可能又因为牵连会导致f改变，为了确保计算一致，这里也要更改
+
                 if (_tableau.getCell(row, b)!= 0.0 ){
                     double sum = 0.0;
                     for (unsigned col = 0; col < _tableau.getNumVars(); col++) {
-                        // 如果有值，那就取出计算,
-                        // 一般col和row相同的时候用-1表示自身，所以要跳过col==row的情况
+
+
 //                        if ((col != row) && (!FloatUtils::areEqual(_tableau.getCell(row, col), 0.0))) {
                         if ((row != col) && (_tableau.getCell(row, col)!= 0.0)) {
                             sum += _tableau.getCell(row, col) * _assignment[col];
@@ -2242,7 +2242,7 @@ public:
     {
         unsigned partner = 0, b = 0, f = 0;
 
-        // 如果是relu变量，则取出它以及相关的b或f
+
         if ( _reluPairs.isRelu( variable ) )
         {
             // The variable is relu.
@@ -2251,17 +2251,17 @@ public:
             b = _reluPairs.isB( variable ) ? variable : partner;
         }
 
-        // 如果不是relu变量，或者relu变量的f已经被消除
+
         if ( !_reluPairs.isRelu( variable ) || _dissolvedReluVariables.exists( f ) )
         {
             // For non-relus, we can just update the bound.
-            // 直接更新上界为传入的bound值
+
             _upperBounds[variable].setBound( bound );
             _upperBounds[variable].setLevel( level );
 
             unsigned violatingStackLevel;
 
-            // 判断上下界是否是符合常理的
+
             if ( !boundInvariantHolds( variable, violatingStackLevel ) )
                 throw InvariantViolationError( violatingStackLevel );
 
@@ -2269,7 +2269,7 @@ public:
 
             // If the variable is basic, it's okay if it's out of bounds.
             // If non-basic and out of bounds, need to update.
-            // 如果更新了界限范围的是一个non-basic，且越界了，那么就要将其值修正为这个界限值（由于update可以接受的delta可为正负数，则这里可以直接用bound - _assignment[variable]
+
             if ( !_basicVariables.exists( variable ) && outOfBounds( variable ) )
                 update( variable, bound - _assignment[variable] );
 
@@ -2363,7 +2363,7 @@ public:
 
         unsigned partner = 0, b = 0, f = 0;
 
-        // 如果是relu变量，找到b\f
+
         if ( _reluPairs.isRelu( variable ) )
         {
             // The variable is relu.
@@ -2372,7 +2372,7 @@ public:
             b = _reluPairs.isB( variable ) ? variable : partner;
         }
 
-        // 如果不是relu变量，更新相应的下界
+
         if ( !_reluPairs.isRelu( variable ) || _dissolvedReluVariables.exists( f ) )
         {
             // For non-relus, we can just update the bound.
@@ -2394,7 +2394,7 @@ public:
             return false;
         }
 
-        // 没开启，忽略
+
         // Should we use almost-broken elimination?
         if ( FloatUtils::isNegative( bound ) &&
              FloatUtils::gte( bound, -ALMOST_BROKEN_RELU_MARGIN ) )
@@ -2408,8 +2408,8 @@ public:
             }
         }
 
-        // 如果是relu变量，且下界大于等于0，则更新b与f的下界，并且可以尝试设置求解了f为merge
-        // 此时即使越界，要更新也是更新为正数，所以update时只是到bound
+
+
         // If the bound is non-negative, update bounds on both F and B.
         if ( !FloatUtils::isNegative( bound ) )
         {
@@ -2436,19 +2436,19 @@ public:
             if ( !_basicVariables.exists( partner ) && outOfBounds( partner ) )
                 update( partner, bound - _assignment[partner], true );
 
-            // 这里会将b设置为f的值，并将f设置为resolved,如果上面更新的界限导致basic越界，也会在里面进行pivot，然后更新回界限，再合并
+
             return unifyReluPair( f );
         }
         else
         {
-            // 下界为负数时，也还是同时更新两者的下界,此时即使越界，也是更新回下界（负数），所以要乘ratio
 
-            if (_reluPairs.isF(variable)) {     // 如果要更新的界限是f的，那么b就是 （ 1 / leakyRatio）* bound
+
+            if (_reluPairs.isF(variable)) {
                 _upperBounds[variable].setBound( bound );
                 _upperBounds[variable].setLevel( level );
                 _upperBounds[partner].setBound( (1 / getLeakyValue()) * bound );
                 _upperBounds[partner].setLevel( level );
-            } else{ // 如果要更新的界限是b的，那么f的就是 leakyRatio * bound
+            } else{
                 _upperBounds[variable].setBound( bound );
                 _upperBounds[variable].setLevel( level );
                 _upperBounds[partner].setBound( getLeakyValue() * bound );
@@ -2478,7 +2478,7 @@ public:
     {
         unsigned partner = 0, b = 0, f = 0;
 
-        // 如果是relu变量，找到b\f
+
         if ( _reluPairs.isRelu( variable ) )
         {
             // The variable is relu.
@@ -2487,7 +2487,7 @@ public:
             b = _reluPairs.isB( variable ) ? variable : partner;
         }
 
-        // 如果不是relu变量，更新相应的下界
+
         if ( !_reluPairs.isRelu( variable ) || _dissolvedReluVariables.exists( f ) )
         {
             // For non-relus, we can just update the bound.
@@ -2509,7 +2509,7 @@ public:
             return false;
         }
 
-        // 没开启，忽略
+
         // Should we use almost-broken elimination?
         if ( FloatUtils::isNegative( bound ) &&
              FloatUtils::gte( bound, -ALMOST_BROKEN_RELU_MARGIN ) )
@@ -2523,7 +2523,7 @@ public:
             }
         }
 
-        // 如果是relu变量，且是非负数下界，则更新b与f的下界
+
         // If the bound is non-negative, update bounds on both F and B.
         if ( !FloatUtils::isNegative( bound ) )
         {
@@ -2554,7 +2554,7 @@ public:
         {
             // Negative bound. This can only be called for the B, doesn't affect the F.
 
-            // 如果是relu变量，且下界是负数，则只更新b的下界，不影响f的下界
+
             _lowerBounds[variable].setBound( bound );
             _lowerBounds[variable].setLevel( level );
 
@@ -2617,9 +2617,9 @@ public:
         // b and f are now equal and non basic. Replace b with f
         _tableau.addColumnEraseSource( b, f );
 
-        // 兼具向_dissolvedReluVariables中添加的功能，
+
         markReluVariableDissolved( f, TYPE_MERGE );
-//        deleteIfJustItself();  //上面一行有过tableau的合并，可能会导致某些var的行只有它自己，跟其他变量不再有关系，所以要检测，删除这样的行
+
 
         log( "Tableau after unification:\n" );
         dump();
@@ -2628,27 +2628,27 @@ public:
     }
 
     bool checkIfJustItself(){
-        // 首先，只有basic会在对角线上有-1，所以其实只需要遍历basic所在的行
+
         Set<unsigned> basicSet = getBasicVariables();
         Set<unsigned>::const_iterator itr;
         for(itr = basicSet.begin(); itr != basicSet.end(); itr++){
             bool eraseFlag = true;
-            // 遍历basic的一行
+
             for (unsigned col = 0; col < _tableau.getNumVars(); col++) {
-                if ((*itr != col) && (  !FloatUtils::isZero(_tableau.getCell(*itr, col)) ) ){   //如果除了对角线上的地方还有其他地方有元素，
-                    // 如果这行中，有除了对角线元素以外的其他系数，就说明是正常的，跳出检测下一行
+                if ((*itr != col) && (  !FloatUtils::isZero(_tableau.getCell(*itr, col)) ) ){
+
                     eraseFlag = false;
                     break;
-                } else if ((*itr == col) && (_tableau.getCell(*itr, col) != -1) ){  // 如果对角线上不等于-1，出错
+                } else if ((*itr == col) && (_tableau.getCell(*itr, col) != -1) ){
                     throw Error( Error::VARIABLE_NOT_BASIC );
                 }
             }
-            if (eraseFlag) {    // 刚刚检查的一行只有对角线上一个元素为-1，所以是有问题的
+            if (eraseFlag) {
 //                printf("~~~~~checkIfJustItself(): the row %u is abnormal %s:%u\n", *itr, toName(*itr).ascii(), *itr);
                 return true;
             }
         }
-        // 检测完全部，发现都是正常的，就返回false
+
         return false;
     }
 
@@ -2656,20 +2656,20 @@ public:
     // add by lzs
     void deleteIfJustItself(){
 //        printf("\n~~~~~call deleteIfJustItself()\n");
-        // 首先，只有basic会在对角线上有-1，所以其实只需要遍历basic所在的行
+
         Set<unsigned> basicSet = getBasicVariables();
         Set<unsigned>::const_iterator itr;
         for(itr = basicSet.begin(); itr != basicSet.end(); itr++){
             bool eraseFlag = true;
             for (unsigned col = 0; col < _tableau.getNumVars(); col++) {
-                if ((*itr != col) && (  !FloatUtils::isZero(_tableau.getCell(*itr, col)) ) ){   //如果除了对角线上的地方还有其他地方有元素，
+                if ((*itr != col) && (  !FloatUtils::isZero(_tableau.getCell(*itr, col)) ) ){
                     eraseFlag = false;
                     break;
-                } else if ((*itr == col) && (_tableau.getCell(*itr, col) != -1) ){  // 如果对角线上不等于-1，出错
+                } else if ((*itr == col) && (_tableau.getCell(*itr, col) != -1) ){
                     throw Error( Error::VARIABLE_NOT_BASIC );
                 }
             }
-            if (eraseFlag) {    // 只有对角线上一个元素为-1，所以要删除
+            if (eraseFlag) {
 //                printf("~~~~~ delete %s:%u\n", toName(*itr).ascii(), *itr);
                 _tableau.eraseRow(*itr);
                 _basicVariables.erase(*itr);
@@ -2719,7 +2719,7 @@ public:
         // b and f are now equal and non basic. Replace b with f
         _tableau.addColumnEraseSource( b, f );
 
-        // 兼具向_dissolvedReluVariables中添加的功能，
+
         markReluVariableDissolved( f, TYPE_MERGE );
 
         log( "Tableau after unification:\n" );
@@ -2816,14 +2816,14 @@ public:
 
     void initialUpdate()
     {
-        // 计算当前变量值是否越界的状态,write in _varToStatus, so we can judge their bounds more convenient
+
         computeVariableStatus();
 
         for ( unsigned i = 0; i < _numVariables; ++i )
         {
             unsigned violatingStackLevel;
 
-            // 判断所有值的上下界是否是符合常理的(That is : lower bound is less than upper bound)，如果不，要抛出异常
+
             if ( !boundInvariantHolds( i, violatingStackLevel ) )
             {
                 printf( "Bound invariant violation on variable: %s\n", toName( i ).ascii() );
@@ -2832,28 +2832,28 @@ public:
                 throw InvariantViolationError( violatingStackLevel );
             }
 
-            // 如果non-basic变量超出上或下界（OutOfBounds会同时检查上下界，任何一方越界都会返回true），那么要进行更新，
-            // 超越下界就更新为下界值，否则更新为上界值。
 
-            // 此处是 paper第一步，v31越界，在此处被更新为下界值
+
+
+
 
             if ( !_basicVariables.exists( i ) && outOfBounds( i ) )
             {
-                // 如果是越下界（严格小于），那就将赋值加上差值，使赋值为下界值
+
                 if ( tooLow( i ) )
                     update( i, _lowerBounds[i].getBound() - _assignment[i] );
-                    // 如果是越上界，则赋值为上界值
+
                 else
                     update( i, _upperBounds[i].getBound() - _assignment[i] );
             }
         }
 
         log( "Checking invariants after initial update\n" );
-        // check Tableau的值是否有异常、non-basic是否在上下界范围内、relu是否正常
+
         checkInvariants();  //if has error, it will exit(1) immediately
     }
 
-    // 先设置好fix时不同variable需要的参数，然后进行fix，优先fix b与f一致，其次再考虑设置f与b一致
+
     bool fixBrokenRelu( unsigned toFix )
     {
         bool isF = _reluPairs.isF( toFix );
@@ -2870,24 +2870,24 @@ public:
         double fDelta;
         double bDelta;
 
-        // f为非负，b为非负
+
         if ( !FloatUtils::isNegative( fVal ) && !FloatUtils::isNegative( bVal ) )
         {
             fDelta = bVal - fVal;
             bDelta = fVal - bVal;
 
         } else if ( !FloatUtils::isNegative( fVal ) && FloatUtils::isNegative( bVal )) {
-            // f为非负，b为负
+
             fDelta =  getLeakyValue() * bVal - fVal;
             bDelta = fVal - bVal;
 
         } else if ( FloatUtils::isNegative( fVal ) && !FloatUtils::isNegative( bVal )) {
-            // f为负，b为非负
+
             fDelta = bVal - fVal;
             bDelta = (1 / getLeakyValue()) * fVal - bVal;
 
         }else if (FloatUtils::isNegative( fVal ) && FloatUtils::isNegative( bVal )) {
-            // f为负，b为负
+
             fDelta = getLeakyValue() * bVal - fVal;
             bDelta = (1 / getLeakyValue()) * fVal - bVal;
 
@@ -2908,7 +2908,7 @@ public:
 
         return true;
     }
-    // 先设置好fix时不同variable需要的参数，然后进行fix，优先fix b与f一致，其次再考虑设置f与b一致
+
     bool fixBrokenRelu_temp( unsigned toFix )
     {
         bool isF = _reluPairs.isF( toFix );
@@ -2925,17 +2925,17 @@ public:
         double fDelta;
         double bDelta;
 
-        // 如果forward变量为正，且backward变量为非正，则若要纠正f,则
+
         if ( FloatUtils::isPositive( fVal ) && !FloatUtils::isPositive( bVal ) )
         {
             fDelta = -fVal;
             bDelta = fVal - bVal;
-        }// 如果f为正，且b为正，则各自delta为两者的差值
+        }
         else if ( FloatUtils::isPositive( fVal ) && FloatUtils::isPositive( bVal ) )
         {
             fDelta = bVal - fVal;
             bDelta = fVal - bVal;
-        }// 如果f为0，b为正数，则纠正f时将f置为b，纠正b时将b置为负数
+        }
         else if ( FloatUtils::isZero( fVal ) && FloatUtils::isPositive( bVal ) )
         {
             fDelta = bVal;
@@ -2960,7 +2960,7 @@ public:
         log( Stringf( "fixBrokenReluVariable Starting: var = %s, delta = %lf\n", toName( var ).ascii(), delta ) );
         //printf( "fixBrokenReluVariable Starting: var = %s, delta = %lf\n", toName( var ).ascii(), delta );
 
-        // 若为non-basic变量
+
         if ( !_basicVariables.exists( var ) )
         {
             DEBUG(
@@ -2986,7 +2986,7 @@ public:
             log( Stringf( "Var %s isn't basic; no pivot needed, simply updating\n", toName( var ).ascii() ) );
             update( var, delta, true );
             return true;
-        }// 若为 basic 变量，需要先pivot()，然后再update
+        }
         else
         {
             ++_brokenReluStat;
@@ -3025,14 +3025,14 @@ public:
 
     void update( unsigned variable, double delta, bool ignoreRelu = false )
     {
-        // delta可能是正数，也可能是负数，
+
 
         if ( FloatUtils::isZero( delta ) )
             return;
 
         log( Stringf( "\t\tUpdate: %s += %.2lf\n", toName( variable ).ascii(), delta ) );
 
-        // 更新值操作
+
         _assignment[variable] += delta;
         turnAlmostZeroToZero( _assignment[variable] );
         computeVariableStatus( variable );
@@ -3040,8 +3040,8 @@ public:
         const Tableau::Entry *columnEntry = _tableau.getColumn( variable );	// variable is i
         const Tableau::Entry *current;
 
-        // 更新了non-basic变量之后，要根据Tableau里的系数，将凡是有这个non-basic出现的式子的basic的值一起更新，
-        // 每次赋值之后，都要对接近0的变量进行置0操作，并根据当前assignment重新计算当前的变量的状态
+
+
         while ( columnEntry != NULL )
         {
             current = columnEntry;      // current is the non-basic in this time to update
@@ -3057,8 +3057,8 @@ public:
         }
 
         // If the updated variable was Relu, we might need to fix the relu invariant
-        // 如果被更新的是relu变量，那么还要考虑是否需要fix
-        // ignoreRelu决定了是否需要忽略relu关系，默认为false,则需要考虑（initialUpdate中没有传值，使用的是默认值，所以还是需要考虑
+
+
         if ( _reluPairs.isRelu( variable ) && !ignoreRelu )
         {
             unsigned partner = _reluPairs.toPartner( variable );
@@ -3069,7 +3069,7 @@ public:
             log( Stringf( "Update was on relu. Parnter = %u\n", partner ) );
 
             // If the partner is basic, it's okay for the pair to be broken
-            // 现在variable肯定不是basic, 所以如果它的partner是basic , 可以允许暂时broken,
+
             // because the rules made by algorithm need this, if it is basic , it might be changed by another non-basic
             // only if all the relu pair's two variable are non-baisc , we need to fix them
 
@@ -3082,45 +3082,45 @@ public:
             // The partner is NOT basic. If the connection is broken,
             // we can fix the partner, if needed.
 
-            // 但如果partner是non-basic, 那么下一步就需要fix这个partner
+
 
             log( "Parnter is NOT basic. Checking if more work is needed...\n" );
 
             log( Stringf( "b = %u, f = %u, bVal = %lf, fVal = %lf\n", b, f, _assignment[b], _assignment[f] ) );
 
-            // _dissolvedReluVariables是Map类型，表示已经被eliminate的ReluPair
 
-            // 如果f存在于_dissolvedReluVariables，那就不需要做任何操作，直接返回
+
+
             if ( _dissolvedReluVariables.exists( f ) )
             {
                 log( "Pair has been disolved, don't care about a violation\n" );
                 return;
             }
 
-            // 如果没有broken，那就不需要任何操作，直接返回
+
             if ( !reluPairIsBroken( b, f ) )
             {
                 log( "relu pair is NOT broken\n" );
                 return;
             }
 
-            // 排除了：1、目前已经赋值的variable的partner是基变量
-            //		2、forward变量已被eliminate
-            //		3、reluPairs没有broken的情况，下面就该进行fix操作
 
-            // 首先判断我们之前assignment的variable是F还是B，如果是F，则partner是B，我们需要fixB,运用updateB规则
-            // 否则，partner就是F，运用updateF规则
+
+
+
+
+
 
             if ( variableIsF )
             {
                 // We need to fix B. This means setting the value of B to that of F.
                 log( Stringf( "Cascading update: fixing non-basic relu partner b = %u\n", b ) );
 
-                // fix backward 变量，
 
-                //由于 forward变量的范围是0~正数，都在backward可取的范围内，所以可以直接赋值
-                // 如paper中updateB规则：令B加上其与F的差值（这个差值可能为正，可能为负
-                // 调用update函数时，第3个参数传入true,表示这已经是对relu变量进行操作，不需要再进入判断流程
+
+
+
+
 
                 update( b, _assignment[f] - _assignment[b], true );
 
@@ -3136,9 +3136,9 @@ public:
                 // and otherwise just setting it to B.
                 log( Stringf( "Cascading update: fixing non-basic relu partner f = %u\n", f ) );
 
-                // fix forward变量，
 
-                //不能直接赋值，需要根据backward是否大于0，来决定是直接赋值，还是置0
+
+
 
                 if ( FloatUtils::isNegative( _assignment[b] ) )
                     update( f, -_assignment[f], true );
@@ -3161,7 +3161,7 @@ public:
         log( Stringf( "\t\tPivot: %s <--> %s\n", toName( basic ).ascii(), toName( nonBasic ).ascii() ) );
 
         // Sanity checks:
-        //检查传入的non-basic和basic是否是正确的
+
         if ( _basicVariables.exists( nonBasic ) )
             throw Error( Error::ILLEGAL_PIVOT_OP,
                          Stringf( "Non-basic variable %s is basic", toName( nonBasic ).ascii() ).ascii() );
@@ -3169,14 +3169,14 @@ public:
         if ( !_basicVariables.exists( basic ) )
             throw Error( Error::ILLEGAL_PIVOT_OP, "Basic variable isn't basic" );
 
-        // 1、更改_basicVariables里存储的值
+
         _basicVariables.erase( basic );
         _basicVariables.insert( nonBasic );
 
         timeval start = Time::sampleMicro();
         unsigned numCalcs = 0;
 
-        // 取得tableau中对应表示两个变量的关系的系数，如果没有，则返回0.0
+
         double cell = _tableau.getCell( basic, nonBasic );
         double absWeight = FloatUtils::abs( cell );
 
@@ -3185,7 +3185,7 @@ public:
             printf( "--- Numerical Instability Warning!! Weight = %.15lf ---\n", absWeight );
         }
 
-        // 将新basic写入Tableau
+
         _tableau.addScaledRow( basic,
                                ( -1.0 ) / cell,
                                nonBasic,
@@ -3194,13 +3194,13 @@ public:
                 //
                                &numCalcs
         );
-        // 将原basic从Tableau中删除，主要是修正该Entry出现在的列链表，删除Enrty,最后删除_rows数组中存储的对应表头，即删除该双向链表
+
         _tableau.eraseRow( basic );
 
         log( Stringf( "\t\t\tPivot--clearing %u column entries--starting\n",
                       _tableau.getColumnSize( nonBasic ) ) );
 
-        // 完成当前等式的pivot之后，还要将新Basic出现过的其他basic等式也一起做更改
+
         const Tableau::Entry *columnEntry = _tableau.getColumn( nonBasic );
         const Tableau::Entry *current;
 
@@ -3209,8 +3209,8 @@ public:
             current = columnEntry;
             columnEntry = columnEntry->nextInColumn();
 
-            // 如果在删除了原basic行之后，新basic所在的列还有其他值，也就是它还出现在了其他等式的右边，此时必须要进行相关处理，将它所在列的其他行置0，
-            // 同时处理置0所在行的其他系数 (通过addScaledRow一并完成）
+
+
             if ( current->getRow() != nonBasic )
             {
                 _tableau.addScaledRow( nonBasic,
@@ -3392,15 +3392,15 @@ public:
     bool eliminateAuxVariables()
     {
         log( "eliminateAuxVariables starting\n" );
-        computeVariableStatus();    // 设置_varToStatus
+        computeVariableStatus();
 
         Set<unsigned> initialAuxVariables = _basicVariables;
 
         for ( const auto &aux : initialAuxVariables )
         {
-            // eliminateIfPossible只有在没找到可供pivot的候选者时才会返回false,
-            // 否则只要有过pivot,不论是否eliminate，都会返回true
-            // 只要有其中一个辅助变量没法再pivot,就返回false
+
+
+
             if ( !eliminateIfPossible( aux ) )
             {
                 log( "eliminateAuxVariables finished UNsuccessfully\n" );
@@ -3414,23 +3414,23 @@ public:
 
     bool eliminateIfPossible( unsigned var )
     {
-        //初始时，basic都是另外引入的辅助变量，所以这里只可能是辅助变量，不可能是relu，
-        // 如果此函数只在初始时调用，则没问题，如果后续运行中继续调用，可能会有问题
+
+
         if ( _reluPairs.isRelu( var ) )
         {
             printf( "Attempted to eliminate a relu variable. They shouldn't be marked as aux\n" );
             exit( 1 );
         }
-        // 判断是否超越下界,这里的var只会是最初调用时的辅助变量，所以一定时候basic
+
         bool increase = tooLow( var );
 
-        // 根据越界情况，取delta为上或下界与value的差值
+
         double delta = increase?
                        ( _lowerBounds[var].getBound() - _assignment[var] ) :
                        ( _upperBounds[var].getBound() - _assignment[var] );
 
-        // 查找可供进行pivot的候选者
-        // 没有找到，返回false，退出函数
+
+
         unsigned pivotCandidate;
         if ( !findPivotCandidate( var, increase, pivotCandidate, false ) )
             return false;
@@ -3440,9 +3440,9 @@ public:
                       delta,
                       toName( pivotCandidate ).ascii() ) );
 
-        // 进行pivot操作
+
         pivot( pivotCandidate, var );
-        // 更新,如果delta为0，则自动返回
+
         update( var, delta );
 
         if ( !fixedAtZero( var ) )
@@ -3486,23 +3486,23 @@ public:
             const double coefficient = current->getValue();
             bool positive = FloatUtils::isPositive( coefficient );
 
-            // increase表示是否越下界，若是则为true ,需要增加 , basic变量BELOW_LB
-            // !increase表示不越下界，那么就是 AT_LB,BETWEEN，AT_UB,ABOVE_UB
-            // canIncrease()表示一定是小于上界的，不会大于也不会等于，根据变量此时的状态判断是否可以再继续增大值，如果是越下界BELOW_LB、等于下界AT_LB、上下界之间BETWEEN，则返回ture
-            // canDecrease()表示一定是大于下界的，不会大于也不会等于，与上相反，如果是越上界ABOVE_UB，等于上界AT_UB、上下界之间BETWEEN，则返回true
 
-            // 总结：1、原basic越下界<、系数为正、且这个变量的value可以被增加
-            // 2、原basic越下界<、系数为负，且这个变量的value可以被减少
-            // 3、原basic非越下界>=（大于等于下界都可以，可能越上界，也可能不越）、系数为正、value可以被减少
-            // 4、原basic非越下界>=、系数为负，value可以被增加
-            // 有以上4种情况的变量，可以进入下一步，否则就意味着当前变量不满足paper中slack的要求，退出此次循环查找下一个
 
-            // 这里其实只要大致方向对就OK，即以下界为分割点，只要小于下界，那么就只能进行加正和减负操作
-            // 只要大于等于下界，那么就可以进行减正和加负操作，
-            // 我们并不保证操作后的non-basic(即将变成新basic)一定在范围内，
-            // 如果小于下界，可能加正、减负之后还是小于下界，如果大于等于下界，可能减正、加负之后会小于下界或仍然大于上界，
-            // 但此时并不考虑这些，只考虑运算的演进方向是对的
-            // 所以如果初始化时，一个辅助变量在左边的等式，如果找不到可以变换的值，那么单纯形法就要报错，因为最终辅助变量都是要变换到右边设值为0的
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             if ( !( ( increase && ( positive ) && canIncrease( column ) ) ||
                     ( increase && ( !positive ) && canDecrease( column ) ) ||
@@ -3515,9 +3515,9 @@ public:
 
             double weight = FloatUtils::abs( coefficient );
 
-            // 默认值为true,但是传入值为false,一定会进入if,返回true
-            // ensureNumericalStability是指是否需要保证数字的稳定性，因为当数字太小时，由于计算机固有误差，会近似等于0
-            // 而此时刚刚开始进行计算，传入false,可以忽略这一要求，保证在满足slack条件的情况下一定能找到pivot候选者
+
+
+
             if ( !ensureNumericalStability || FloatUtils::gte( weight, NUMBERICAL_INSTABILITY_CONSTANT ) )
             {
                 pivotCandidate = column;
@@ -3525,7 +3525,7 @@ public:
             }
 
             // Have a candidate with a small pivot coefficient
-            // 如果找到了一个候选者，但是它的值非常小，先将第一个记录下来，再进行后续比较，如果后续还发现了符合条件，而权重值更大的pivot候选者，就更新least记录
+
             found = true;
             if ( FloatUtils::gt( weight, leastEvilWeight ) )
             {
@@ -3533,7 +3533,7 @@ public:
                 leastEvilNonBasic = column;
             }
         }
-        // 在遍历完所有变量之后，least中记录的是权重值最大的候选者，将其返回
+
         if ( found )
         {
             log( Stringf( "findPivotCandidate: forced to pick a bad candidate! Weight = %lf\n", leastEvilWeight ) );
@@ -3541,7 +3541,7 @@ public:
             return true;
         }
 
-        // 没找到pivot候选者
+
         return false;
     }
 
@@ -3649,13 +3649,13 @@ public:
 
     void makeAllBoundsFinite()
     {
-        // 计算上或下界中有无穷大值的变量的个数
+
         countVarsWithInfiniteBounds();
         log( Stringf( "makeAllBoundsFinite -- Starting (%u vars with infinite bounds)\n", _varsWithInfiniteBounds ) );
 //        printf("\n----- printStatistics() ----\n");
 //        printStatistics();
 
-        // 不懂
+
         dump();
         for ( const auto &basic : _basicVariables )
             makeAllBoundsFiniteOnRow( basic );
@@ -3674,12 +3674,12 @@ public:
     void makeAllBoundsFiniteOnRow( unsigned basic )
     {
 //        printf("~~~~basic: %u\n", basic);
-        // 取得当前basic变量的row入口
+
         const Tableau::Entry *row = _tableau.getRow( basic );
         const Tableau::Entry *tighteningVar = NULL;
 
-        // 遍历查找具有无穷大界限的那个变量，地址存储在tighteningVar中，
-        // 如果有多个，报错
+
+
         while ( row != NULL )
         {
 //            printf("~~~~row->getColumn(): %u\n", row->getColumn());
@@ -3702,7 +3702,7 @@ public:
 
         unsigned tighteningVarIndex = tighteningVar->getColumn();
 
-        // 如果找到了无穷大界限的变量，设置缩放量为 -1.0 / 888，
+
         double scale = -1.0 / tighteningVar->getValue();
 
         row = _tableau.getRow( basic );
@@ -3711,7 +3711,7 @@ public:
         double max = 0.0;
         double min = 0.0;
 
-        // 同上方法再次遍历，
+
         while ( row != NULL )
         {
             current = row;
@@ -3733,12 +3733,12 @@ public:
             }
         }
 
-        // 如果是上界无穷大，或者计算出的max小于上界，即可以缩小界限的上界范围，则更新上界
+
         if ( !_upperBounds[tighteningVarIndex].finite() ||
              FloatUtils::lt( max, _upperBounds[tighteningVarIndex].getBound() ) )
             updateUpperBound( tighteningVarIndex, max, 0 );
 
-        //  如果是下界无穷大，或者计算出的min大于下界，即可以缩小下界的范围。
+
         if ( !_lowerBounds[tighteningVarIndex].finite() ||
              FloatUtils::gt( min, _lowerBounds[tighteningVarIndex].getBound() ) )
             updateLowerBound( tighteningVarIndex, min, 0 );
@@ -3767,24 +3767,24 @@ public:
             }
         }
     }
-    // 判断某个变量是否是已经被求解了的，
+
     bool isDissolvedBVariable( unsigned variable ) const
     {
-        // 首先需要是一个relu变量
+
         if ( !_reluPairs.isRelu( variable ) )
             return false;
 
-        // 其次要是个b变量
+
         if ( _reluPairs.isF( variable ) )
             return false;
 
         unsigned f = _reluPairs.toPartner( variable );
 
-        // 取得b变量的f，用来判断是否已存在于_dissolvedReluVariables里面，如果不存在，那么返回false表示没有被求解
+
         if ( !_dissolvedReluVariables.exists( f ) )
             return false;
 
-        // 如果确实已经被添加到_dissolvedReluVariables里面，那么看它的类型是不是merge，如果是,返回true
+
         return _dissolvedReluVariables.at( f ) == TYPE_MERGE;
     }
 
@@ -3924,22 +3924,22 @@ public:
     {
         checkInvariants();
 
-        // 将当前初始变换后的Tableau存入_preprocessedTableau
-        // Tableau //Reluplex构造方法中初始化，initializeCell中添加，pivot中修改
+
+
         _tableau.backupIntoMatrix( &_preprocessedTableau );
 
-        // 初始化时暂时不涉及
+
         _preprocessedDissolvedRelus = _dissolvedReluVariables;
 
 
-        // _basicVariables;	//markBasic中初始化，pivot中修改
+
         _preprocessedBasicVariables = _basicVariables;
 
-        // 存储当前的赋值到 _preprocessedAssignment
-        // _assignment	// Reluplex构造方法中默认初始化为0，update中修改
+
+
         memcpy( _preprocessedAssignment, _assignment, sizeof(double) * _numVariables );
 
-        // // setUpperBound中初始化，makeAllBoundsFiniteOnRow > updateUpperBound中修改
+
         for ( unsigned i = 0; i < _numVariables; ++i )
         {
             // It is assumed that these bounds are all at level 0.
@@ -4316,7 +4316,7 @@ public:
             {
                 if ( ( !_basicVariables.exists( b ) ) && ( !_basicVariables.exists( f ) ) )
                 {
-                    if ( FloatUtils::isPositive( b ) )  // 让f与b保持一致
+                    if ( FloatUtils::isPositive( b ) )
                         update( f, _assignment[b] - _assignment[f], true );
                     else
                         update( f, getLeakyValue() * _assignment[b] - _assignment[f], true );
@@ -4335,7 +4335,7 @@ public:
             {
                 if ( ( !_basicVariables.exists( b ) ) && ( !_basicVariables.exists( f ) ) )
                 {
-                    if ( FloatUtils::isPositive( b ) )  // 让f与b保持一致
+                    if ( FloatUtils::isPositive( b ) )
                         update( f, _assignment[b] - _assignment[f], true );
                     else
                         update( f, -_assignment[f], true );
@@ -4492,11 +4492,11 @@ private:
     bool _wasInitialized;
     Tableau _tableau;
     Tableau _preprocessedTableau;
-    VariableBound *_upperBounds;	//数组，存储所有变量的相应值
-    VariableBound *_lowerBounds;	//数组，存储所有变量的相应值
-    VariableBound *_preprocessedUpperBounds;	//数组，存储所有变量的相应值
-    VariableBound *_preprocessedLowerBounds;	//数组，存储所有变量的相应值
-    double *_preprocessedAssignment;	//数组，存储所有变量的相应值
+    VariableBound *_upperBounds;
+    VariableBound *_lowerBounds;
+    VariableBound *_preprocessedUpperBounds;
+    VariableBound *_preprocessedLowerBounds;
+    double *_preprocessedAssignment;
     Set<unsigned> _basicVariables;	// Set
     Set<unsigned> _preprocessedBasicVariables;
     Map<unsigned, String> _variableNames;
@@ -4511,7 +4511,7 @@ private:
     bool _logging;
     bool _dumpStates;
 
-    unsigned _numCallsToProgress;	//初始化为0，表示调用process的次数
+    unsigned _numCallsToProgress;
     unsigned _numPivots;
     unsigned long long _totalPivotTimeMilli;
     unsigned long long _totalDegradationCheckingTimeMilli;
@@ -4549,7 +4549,7 @@ private:
     Map<unsigned, ReluDissolutionType> _preprocessedDissolvedRelus; //
 
     bool _printAssignment;
-    Set<unsigned> _eliminatedVars;  // 存储被消除的辅助变量，
+    Set<unsigned> _eliminatedVars;
 
     unsigned _numOutOfBoundFixes;
     unsigned _numOutOfBoundFixesViaBland;
@@ -4636,17 +4636,17 @@ public:
 
         // Table is in tableau form
 
-        /*********check Tableau中是否有非法值，例如：
-            1、basic值在Tableau中_column数组中对应位置一定不为null
-            2、初始化Cell时最后一行是否满足initializeCell( 6, 6, -1.0 )的形式
-            3、basic是否出现在其他basic的等式右边
+        /********* Check that the tableau remains well formed, for example:
+            1. each basic variable has an active column entry,
+            2. each initialized basic row keeps the expected self-entry pattern,
+            3. basic variables do not incorrectly appear on the right-hand side.
         ***************/
 
-        // _basicVariables 是 Set<unsigned>类型，&basic是每一个basic变量的地址
+
         for ( const auto &basic : _basicVariables )
         {
-            // 判断Tableau中basic对应的位置是否有指向，如果有，则表示激活状态，如果为Null，则表示没有激活
-            // 如果没有激活，则退出
+
+
             if ( !_tableau.activeColumn( basic ) )
             {
                 printf( "Error: basic variable's column should be active! (var: %s)\n",
@@ -4654,14 +4654,14 @@ public:
                 exit( 1 );
             }
 
-            // 设置在Tableau的方阵中从basic指向的那一列为入口，即双向链表的Head,
-            // importent:这里就要求在intialCell中构造的时候，最后一行必须是_reluplex->initializeCell( 6, 6, -1.0 )、_reluplex->initializeCell( 7, 7, -1.0 );的形式
+
+
             const Tableau::Entry *columnEntry = _tableau.getColumn( basic );
 
-            // 对于basic变量，它只能出现在等式的左边，不能出现在右边，（因为但凡出现在右边的都会被代换掉
-            // 所以，basic的列size必须为1，且head Entry对应的value必须是 -1.0 (构造时的设置必须与这里一致)
-            // 另又由于构造要求，所以这个head Entry的row 和 column都是同一个值，所以要求columnEntry->getRow() == basic
-            // 如果不等于，那么也要报错退出
+
+
+
+
             if ( ( _tableau.getColumnSize( basic ) != 1 ) ||
                  ( columnEntry->getRow() != basic ) ||
                  ( FloatUtils::areDisequal( columnEntry->getValue(), -1.0 ) ) )
@@ -4684,8 +4684,8 @@ public:
                 if ( current->getColumn() == basic )
                     continue;
 
-                // 判断当前basic的Tableau的row双向链表中，遍历每一行存在的Entry，取得他们的column，也就是等式右边存在的variable,
-                // 如果发现也存在于basic中，报错退出
+
+
                 if ( _basicVariables.exists( current->getColumn() ) )
                 {
                     printf( "Error: a basic variable appears in another basic variable's row\n" );
@@ -4701,7 +4701,7 @@ public:
             if ( _varToStatus.get( i ) == ABOVE_UB || _varToStatus.get( i ) == BELOW_LB )
             {
                 // Only basic variables can be out-of-bounds
-                // 如果是non-basic，但有越界行为，则打印错误并退出
+
                 if ( !_basicVariables.exists( i ) )
                 {
                     printf( "Error: variable is out-of-bounds but is not basic! "

@@ -116,7 +116,7 @@ public:
         _reluplex->computeVariableStatus();
     }
 
-    // 判断是否需要进行split，还是要进行Merge。如果F是正数或0，则B一定也是同样的值，此时是merge，如果F是负数，则B是负值，此时为split
+    // Choose split vs. merge. If F is positive or zero, B matches it and we merge; if F is negative, B is negative and we split.
     bool beginWithSplit( unsigned f )
     {
         // Return true for split, false for merge.
@@ -131,10 +131,10 @@ public:
         }
 
         log( "Starting with split\n" );
-        // 如果是负数，就split，否则，都会merge
+        // A negative F starts with a split; all other cases start with a merge.
         return true;
     }
-    // 判断是否需要进行split，还是要进行Merge。如果F是正数，则B一定也是同样的值，此时是merge，如果F是0，则B是负值，此时为split
+    // Alternate split/merge heuristic: positive F merges, zero F splits.
     bool beginWithSplit_temp( unsigned f )
     {
         // Return true for split, false for merge.
@@ -154,7 +154,7 @@ public:
         return true;
     }
 
-    // 执行论文中 ReluSplit,并将当前状态存入栈中，传入的variable一般是f
+    // Execute the ReluSplit step from the paper and push the current state onto the stack.
     void dissolveReluOnVar( unsigned variable )
     {
 //        printf( "Resolving relu on var: %s. (current depth = %u)\n",
@@ -172,8 +172,8 @@ public:
         // Set the type for the first attempt
         splitInformation->_firstAttempt = true;
 
-        // 判断是否需要进行split，还是要进行Merge。如果F是正数或0，则B一定也是同样的值，此时是merge，如果F是负数，则B是负值，此时为split
-        if ( beginWithSplit( variable ) )   // 判断应该进行spilt(f是负数或0)，还是应该进行merge（f是正数）
+        // Decide whether this branch should start with a split or a merge.
+        if ( beginWithSplit( variable ) )   // Split when F is negative; merge otherwise.
         {
             // Do a split
             splitInformation->_type = SplitInformation::SPLITTING_RELU;
@@ -198,7 +198,7 @@ public:
         _reluplex->incNumStackVisitedStates();
         _reluplex->setCurrentStackDepth( _stack.size() );
     }
-    // 执行论文中 ReluSplit,并将当前状态存入栈中
+    // Execute the ReluSplit step from the paper and push the current state onto the stack.
     void dissolveReluOnVar_temp( unsigned variable )
     {
         log( Stringf( "Resolving relu on var: %s. (current depth = %u)\n",
@@ -216,7 +216,7 @@ public:
         // Set the type for the first attempt
         splitInformation->_firstAttempt = true;
 
-        if ( beginWithSplit( variable ) )   // 判断应该进行spilt，还是应该进行merge
+        if ( beginWithSplit( variable ) )   // Decide whether to start with a split or a merge.
         {
             // Do a split
             splitInformation->_type = SplitInformation::SPLITTING_RELU;
@@ -262,7 +262,7 @@ public:
     {
         timeval start = Time::sampleMicro();
 
-        // while true循环，会一直回退到有分叉的地方，即：oldState->firstAttempt为true时表示此处还有分叉，否则就都是已经遍历过的
+        // Keep popping until we reach a state that still has an unexplored branch.
         while ( true )
         {
             if ( _stack.empty() )
@@ -341,7 +341,7 @@ public:
 
     void pop()
     {
-        // 一次只会pop一层
+        // Each call pops at most one branching level.
 //        printf("\n~~~~~~call a SmtCore.pop() once: \n");
         timeval start = Time::sampleMicro();
 
@@ -435,10 +435,10 @@ public:
 
 //        printf("\n^^^^^^ _fToViolations[f] : %u\n", _fToViolations[f]);
 
-        // 对于broken relu pair 采用的策略是先update-f 或 update-b，只有当update次数超过一定阈值时，才进行split
-        //// notifyBrokenRelu函数的作用就是判断是否update已经超出一定次数 NUM_RELU_OPERATIONS_BEFORE_SPLIT，
-        //// 若是，则调用dissolveReluOnVar（）执行论文中的ReluSplit步骤，返回true
-        //// 否则，直接返回false
+        // For a broken ReLU pair, first try update-f or update-b. Split only after the update count crosses the threshold.
+        //// notifyBrokenRelu checks whether the number of updates exceeded NUM_RELU_OPERATIONS_BEFORE_SPLIT.
+        //// If so, it calls dissolveReluOnVar() to perform the paper's ReluSplit step and returns true.
+        //// Otherwise, it returns false.
         if ( _fToViolations[f] >= NUM_RELU_OPERATIONS_BEFORE_SPLIT )
         {
             DEBUG(

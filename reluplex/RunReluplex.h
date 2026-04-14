@@ -19,14 +19,14 @@ class RunReluplex
 {
 public:
 
-    //// add by lzs
+    //// Added by lzs
     /******** change! **********/
     double **currentAdversaryE ;
-    unsigned num_Node = 1 + 1; //【不可修改，但要修改Reluplex里的solve的indexToVar部分】  输入层元素个数+输出层元素个数
-    unsigned num_AE = 0;    // 当前已取得的对抗样本数
-    unsigned total = 1; //【可修改】申请出来存放对抗样本的空间，想要多少个就为多少，不得小于num_Expected_AE
-    unsigned num_Expected_AE = 1;   //【可修改】单轮runner期望找到的对抗样本数
-    //// add end
+    unsigned num_Node = 1 + 1; // Keep this aligned with solve()/indexToVar when changing input or output counts.
+    unsigned num_AE = 0;    // Number of adversarial examples found so far.
+    unsigned total = 1; // Allocated capacity for adversarial examples; must be >= num_Expected_AE.
+    unsigned num_Expected_AE = 1;   // Number of adversarial examples expected in a single run.
+    //// End additions
 
 
     RunReluplex() : _reluplex( NULL )
@@ -100,7 +100,7 @@ public:
         _reluplex->setLowerBound( 8, 0.0 );
         _reluplex->setUpperBound( 8, 0.0 );
 
-        _reluplex->setLowerBound( 1, -9.0 );    // 为了例子简便，用-9表示负无穷，+9表示正无穷
+        _reluplex->setLowerBound( 1, -9.0 );    // Use +/-9 as a stand-in for infinity in this toy example.
         _reluplex->setUpperBound( 1, 9.0 );
         _reluplex->setUpperBound( 2, 9.0 );
         _reluplex->setLowerBound( 3, -9.0 );
@@ -222,7 +222,7 @@ public:
         _reluplex->setLowerBound( 8, 0.0 );
         _reluplex->setUpperBound( 8, 0.0 );
 
-        _reluplex->setLowerBound( 1, -9.0 );    // 为了例子简便，用-9表示负无穷，+9表示正无穷
+        _reluplex->setLowerBound( 1, -9.0 );    // Use +/-9 as a stand-in for infinity in this toy example.
         _reluplex->setUpperBound( 1, 9.0 );
         _reluplex->setLowerBound( 2, -9.0 );
         _reluplex->setUpperBound( 2, 9.0 );
@@ -255,12 +255,12 @@ public:
                 printf("\n\n===========================\n");
                 printf("Summary: the verification result is : SAT \n");
 
-                for (unsigned j = num_AE; j > 0; --j) {  //倒序输出，为了方便与上面比较，同时unsigned >=0恒为true，所以这里只>0,后面每次使用j时-1即可
+                for (unsigned j = num_AE; j > 0; --j) {  // Print in reverse order; use j > 0 because unsigned never becomes negative.
                     printf("\nThis is a adversial example: %u \n", num_AE - j + 1);
                     for (unsigned k = 0; k < num_Node; ++k) {
                         double assignment = currentAdversaryE[j-1][k];
-                        /**** change! 1 means inputLayerSize****/
-                        if( k < 1){ // 2
+                        /**** change! 1 means inputLayerSize ****/
+                        if( k < 1){
                             printf( "input[%u] = %lf.\n", k, assignment );
                         } else{
                             printf( "output[%u] = %.10lf.\n", k, assignment );
@@ -282,12 +282,12 @@ public:
                 _reluplex->printStatistics();
                 printf("\n==========================\n");
                 printf("Summary: the verification result is : SAT But Then \n");
-                for (unsigned j = num_AE; j > 0; --j) {  //倒序输出，为了方便与上面比较，同时unsigned >=0恒为true，所以这里只>0,后面每次使用j时-1即可
+                for (unsigned j = num_AE; j > 0; --j) {  // Print in reverse order; use j > 0 because unsigned never becomes negative.
                     printf("\nThis is a adversial example: %u \n", num_AE - j + 1);
                     for (unsigned k = 0; k < num_Node; ++k) {
                         double assignment = currentAdversaryE[j-1][k];
-                        /**** change! 1 means inputLayerSize****/
-                        if( k < 1){ // 2
+                        /**** change! 1 means inputLayerSize ****/
+                        if( k < 1){
                             printf( "input[%u] = %lf.\n", k, assignment );
                         } else{
                             printf( "output[%u] = %.10lf.\n", k, assignment );

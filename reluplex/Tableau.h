@@ -219,38 +219,38 @@ public:
         if ( FloatUtils::isZero( value ) )
             return;
 
-		// 设置这个实体本身的值
+
         Entry *entry = new Entry;
         entry->setRow( row );
         entry->setColumn( column );
         entry->setValue( value );
 
-		// 设置与它有关系的值，
-		// setNextInRow需要的形参是Entry指针，而_rows是指针数组，初始化时已经分配好了空间和地址
-		// 那么_rows[row]就是表示一个Entry指针
-		// rows[x]初始化时指向null，所以第一个Entry的nextRow和nextColumn都是null
 
-		// 总结：（1）到（2）之间的内容，就是手工生成双向链表（采用头加法），用于判断Tableau中的某一row和column是否还有下一项数据
+
+
+
+
+
 		// (1)
         entry->setNextInRow( _rows[row] );
         entry->setNextInColumn( _columns[column] );
 
-		// 如果next的Entry不为空，则同样设置关联信息，将其的prev指向当前新生成的Entry
-		// 实际上这就是手工双向链表的操作，如果前面的next为null，则表示指向结束
+
+
 
         if ( _rows[row] != NULL )
             _rows[row]->setPrevInRow( entry );
         if ( _columns[column] != NULL )
             _columns[column]->setPrevInColumn( entry );
 
-		//将当前新生成的Entry放入相应的row和column指针数组中，作用是留个记录，
-		// 等待下次有同样row或column值的Entry生成时，可以将其添加到prev和next的指针指向中
+
+
         _rows[row] = entry;
         _columns[column] = entry;
 		// (2)
-		
 
-		// 记录下当前行和列有多少个有效值
+
+
         ++_rowSize[row];
         ++_columnSize[column];
     }
@@ -338,7 +338,7 @@ public:
         _columnSize[column] = 0;
     }
 
-	// source对应basic,target对应non-basic
+
     void addScaledRow( unsigned source, double scale, unsigned target,
                        // We usually want to guarantee that a certain entry has a certain value
                        unsigned guaranteeIndex, double guaranteeValue,
@@ -349,50 +349,50 @@ public:
 
         _denseMap.clear();
 
-		// 遍历target（pivot中的non-basic，或是pivot之后要更改的其他行）行中出现的每一个Entry，存入denseMap，用于后续判断
-		// 如果有存在，就不用生成新Entry,只需要改变值即可，否则就需要生成
 
-		// 个人理解：在pivot的non-basic调用时，是肯定不会有已存在的值的，只有在pivot之后更改其他行时，这里才会有值加入denseMap
+
+
+
         Entry *targetEntry = _rows[target];
         while ( targetEntry != NULL )
         {
             _denseMap[targetEntry->getColumn()] = targetEntry;
             targetEntry = targetEntry->nextInRow();
         }
-		
-		// 遍历source（原basic或是pivot之后修改其他值时传入的non-basic）中每一行的系数，开始更改值
+
+
         Entry *sourceEntry = _rows[source];
         Entry *current;
         unsigned column;
         while ( sourceEntry != NULL )
         {
-			// 如果是处理新basic行，current表示遍历原basic行中存在的每一个Entry
-			// 如果是处理pivot之后与新basic相关的其他行，current表示遍历新basic行中存在的每一个Entry
+
+
             current = sourceEntry;
             sourceEntry = sourceEntry->nextInRow();
 
             column = current->getColumn();
             Entry *entryInTarget = NULL;
 
-			// 个人理解：只在pivot之后处理相关行中会出现，如果新basic和 相关行 都有相同编号的Entry，就用一个指正指向，方便后续判断
+
             if ( _denseMap.exists( column ) )
                 entryInTarget = _denseMap[column];
 
-			//如果是处理新basic: 原basic行中的Entry都要 乘 scale变换系数（scale = ( -1.0 ) / 原basic的value值，只要乘完就是换算后的系数值）
-			// 如果是处理Pivot后的相关行：scale是该行与新basic的系数值，假设相关行是新basic的3倍，则scale=3,而getValue()取得的是新basic与其他non-basic的倍数，
-			// 两者相乘，得到的就是相关行相对于其他non-basic的倍数，（相当于就是将新basic带入到它此前曾出现过的其他等式中，计算系数）
+
+
+
             double newValue = current->getValue() * scale;
 
             // Statistics
             if ( numCalcs )
                 ++( *numCalcs );
 
-			// 个人理解：只有在pivot之后处理相关行会出现，即pivot之前，新basic还是non-basic在等式右边时，出现在了两个以上的等式右边，并且这两个等式有除了新baisc外其他相同的non-basic变量
+
             if ( entryInTarget )
             {
                 if ( column != guaranteeIndex )
-                    entryInTarget->setValue( entryInTarget->getValue() + newValue );	//不懂：为什么是+，不是直接替换
-																					// 解答：这是处理在pivot之后处理相关行时，系数出现加减，原系数+-新系数
+                    entryInTarget->setValue( entryInTarget->getValue() + newValue );
+
                 else
                     entryInTarget->setValue( guaranteeValue );
 
@@ -406,8 +406,8 @@ public:
                     eraseEntry( entryInTarget );
                 }
             }
-			// 个人理解：如果是处理新basic，一定会进入这个条件句子，生成新Entry
-			// 如果是处理在pivot之后处理相关行，只有在本身没有时，才会引入新的，生成新Entry
+
+
             else
             {
                 // This is a new entry for the target row
@@ -420,13 +420,13 @@ public:
     }
 
     void replaceNonBasicWithAnotherNonBasic(unsigned beReplaced, unsigned replace, double leakyValue){
-        if ( !activeColumn( beReplaced ) )  // 将要被代换的，如果不存在，那就没有操作的必要，但将要去取代的，可以不存在
+        if ( !activeColumn( beReplaced ) )
             return;
 
         _denseMap.clear();
 
-        // 将 replace 出现过的行都记录下来，后面遍历beReplaced，取得出现过的行，如果两者有出现在同一行，就只是抹除beReplaced，
-        // 然后在replace上做系数的加减，否则就要先抹除beReplaced,然后添加replace的系数
+
+
         Entry *replaceEntry = _columns[replace];
         while ( replaceEntry != NULL )
         {
@@ -441,23 +441,23 @@ public:
         while ( beReplacedEntry != NULL )
         {
             current = beReplacedEntry;
-            beReplacedEntry = beReplacedEntry->nextInColumn();  // 记录列链表上下一个值，等待作为下一次while中判断条件
+            beReplacedEntry = beReplacedEntry->nextInColumn();
 
             row = current->getRow();
             Entry *entryInTarget = NULL;
-            if ( _denseMap.exists( row ) )  // 如果要代替和被代替的变量出现在同一行上，改变系数、抹除在column链上的被代替的值
+            if ( _denseMap.exists( row ) )
             {
                 entryInTarget = _denseMap[row];
 //                printf("~~~~~ The entryInTarget: row:%u, column: %u, value: %.10f\n", entryInTarget->getRow(), entryInTarget->getColumn(), entryInTarget->getValue());
-                entryInTarget->setValue( entryInTarget->getValue() + leakyValue * current->getValue()); // 系数相加
+                entryInTarget->setValue( entryInTarget->getValue() + leakyValue * current->getValue());
 //                printf("~~~~~ replaced and replace appear in the same row, set new coefficient value of %u: %.10f\n",entryInTarget->getRow(), entryInTarget->getValue());
             }
             else
             {
-                addEntry(row, replace, leakyValue * current->getValue());  //添加系数，如果原来在x3f上的系数是1，这里要乘以0.5，表示换到x3b后是0.5，因为x3f=0.5x3b
+                addEntry(row, replace, leakyValue * current->getValue());
             }
         }
-        eraseColumn( beReplaced );  // 抹除所有beReplaced出现过的列
+        eraseColumn( beReplaced );
         _denseMap.clear();
     }
 
@@ -656,8 +656,8 @@ public:
 
 private:
     unsigned _size;
-    Entry **_rows;	// 指针数组，初始化以后数组定长度，每个元素指向一个Entry指针，用于在AddEntry时记录双向链表的头，
-					// 以便于构造双向链表，另一作用是在getRow方法中返回row双向链表的head,以便于遍历链表
+    Entry **_rows;
+
     Entry **_columns;
     Vector<unsigned> _rowSize;
     Vector<unsigned> _columnSize;

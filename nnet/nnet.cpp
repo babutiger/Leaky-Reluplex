@@ -40,7 +40,7 @@ NNet *load_network(const char* filename)
     while (strstr(line, "//")!=NULL)
         line=fgets(buffer,bufferSize,fstream); //skip header lines
     record = strtok(line,",\n");
-    nnet->numLayers    = atoi(record);  // get 7，跳过//注释的部分，开始读取网络参数
+    nnet->numLayers    = atoi(record);  // Read network metadata after skipping header comments.
     nnet->inputSize    = atoi(strtok(NULL,",\n"));  // 5
     nnet->outputSize   = atoi(strtok(NULL,",\n"));  // 5
     nnet->maxLayerSize = atoi(strtok(NULL,",\n"));  // 50
@@ -51,14 +51,14 @@ NNet *load_network(const char* filename)
     record = strtok(line,",\n");
     for (i = 0; i<((nnet->numLayers)+1); i++)
     {
-        nnet->layerSizes[i] = atoi(record);     // 取得每一层的size
+        nnet->layerSizes[i] = atoi(record);     // Read the width of each layer.
         record = strtok(NULL,",\n");
     }
 
     //Load the symmetric paramter
     line = fgets(buffer,bufferSize,fstream);
     record = strtok(line,",\n");
-    nnet->symmetric = atoi(record); //取得是否对称的信息
+    nnet->symmetric = atoi(record); // Read whether the network uses symmetric inputs.
 
     //Load Min and Max values of inputs
     nnet->mins = new double[(nnet->inputSize)];
@@ -112,12 +112,12 @@ NNet *load_network(const char* filename)
     for (layer = 0; layer<(nnet->numLayers); layer++)
     {
         nnet->matrix[layer] = new double**[2];
-        nnet->matrix[layer][0] = new double*[nnet->layerSizes[layer+1]];        // [0]存储参数
-        nnet->matrix[layer][1] = new double*[nnet->layerSizes[layer+1]];        // [1]存储bais
+        nnet->matrix[layer][0] = new double*[nnet->layerSizes[layer+1]];        // [0] stores weights.
+        nnet->matrix[layer][1] = new double*[nnet->layerSizes[layer+1]];        // [1] stores biases.
         for (row = 0; row<nnet->layerSizes[layer+1]; row++)
         {
-            nnet->matrix[layer][0][row] = new double[nnet->layerSizes[layer]];  // 参数是 layerSizes[layer+1] * layerSizes[layer]的矩阵
-            nnet->matrix[layer][1][row] = new double[1];    // bais是 layerSizes[layer+1] * 1的矩阵
+            nnet->matrix[layer][0][row] = new double[nnet->layerSizes[layer]];  // Weight matrix: layerSizes[layer+1] x layerSizes[layer].
+            nnet->matrix[layer][1][row] = new double[1];    // Bias vector: layerSizes[layer+1] x 1.
         }
     }
 
@@ -225,7 +225,7 @@ int evaluate_network(void *network, double *input, double *output, bool normaliz
 
     //Cast void* to NNet struct pointer
     NNet *nnet = static_cast<NNet*>(network);
-    int numLayers    = nnet->numLayers;     // 比总层数少1
+    int numLayers    = nnet->numLayers;     // Number of non-input layers.
     int inputSize    = nnet->inputSize;
     int outputSize   = nnet->outputSize;
     int symmetric    = nnet->symmetric;
@@ -268,12 +268,12 @@ int evaluate_network(void *network, double *input, double *output, bool normaliz
     double tempVal;
      printf("number of layers in nnet.cpp = %u\n", numLayers);
 
-    for (layer = 0; layer<(numLayers); layer++)     //循环为0~6，第7层为output，所以不进入计算
+    for (layer = 0; layer<(numLayers); layer++)     // Iterate over hidden and output-producing layers.
     {
         if (printFlag){
             printf("\nwhen compute layer[%u] to layer[%u]\n", layer, layer + 1);
         }
-        for (i=0; i < nnet->layerSizes[layer+1]; i++)   //第0层时，输出维度要看下一层的节点数，所以取nnet->layerSizes[layer+1]
+        for (i=0; i < nnet->layerSizes[layer+1]; i++)   // The output width of layer i is layerSizes[layer+1].
         {
             double **weights = matrix[layer][0];
             double **biases  = matrix[layer][1];
