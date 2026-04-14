@@ -4,6 +4,10 @@ Leaky-Reluplex is a research codebase that extends Reluplex to verify deep neura
 
 This repository contains the code accompanying the paper `Reluplex made more practical: Leaky ReLU`.
 
+## Associated Paper
+
+Jin Xu, Zishan Li, Bowen Du, Miaomiao Zhang, and Jing Liu. `Reluplex made more practical: Leaky ReLU.` 2020 IEEE Symposium on Computers and Communications (ISCC), pp. 1-7, 2020. DOI: https://doi.org/10.1109/ISCC50000.2020.9219587
+
 This repository contains:
 
 - the modified Reluplex solver core,
