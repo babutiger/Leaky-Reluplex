@@ -2,6 +2,8 @@
 
 Leaky-Reluplex is a research codebase that extends Reluplex to verify deep neural networks with Leaky ReLU activation functions.
 
+This repository contains the code accompanying the paper `Reluplex made more practical: Leaky ReLU`.
+
 This repository contains:
 
 - the modified Reluplex solver core,
