@@ -142,22 +142,12 @@ For a step-by-step artifact workflow, see [REPRODUCIBILITY.md](REPRODUCIBILITY.m
 
 ## License
 
-This repository is not available under a single MIT license in its current form.
+This repository keeps the original Reluplex license text in [LICENSE](LICENSE) and [COPYING](COPYING).
 
-The repository contains third-party code and data under multiple licenses:
+Notes:
 
-- Reluplex-derived source code under the modified BSD license inherited from Reluplex,
-- `nnet/` benchmark files under CC BY 4.0,
-- `glpk-4.60/` under the GNU General Public License.
-
-See [LICENSE](LICENSE) and [COPYING](COPYING) for the bundled license text.
-
-For a file-by-file summary, see [LICENSES.md](LICENSES.md). The documentation and repository metadata added in this fork are available under [LICENSE-MIT](LICENSE-MIT), but the core solver, experiments, GLPK sources, and bundled benchmark data are not relicensed to MIT here.
-
-Additional licensing notes:
-
-- neural-network files in `nnet/` are distributed under CC BY 4.0,
-- the project links against GLPK, which is GPL-licensed, so resulting usage and redistribution may be restricted in non-GPL-compatible settings.
+- files under `nnet/` keep their original CC BY 4.0 license,
+- files under `glpk-4.60/` keep their original GPL license.
 
 ## Citation
 
