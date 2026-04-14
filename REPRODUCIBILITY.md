@@ -28,6 +28,8 @@ This performs:
 - all property scripts,
 - the adversarial script.
 
+At the end of the run, the script validates that the expected output files were produced and writes a report to `logs/reproduction_check.txt`.
+
 ## Selective Reproduction
 
 To reproduce only part of the paper:
@@ -42,12 +44,29 @@ If you have already built the binaries:
 ./scripts/reproduce_paper.sh --skip-build property1 property6 adversarial
 ```
 
+You can also validate outputs from an existing run explicitly:
+
+```bash
+./scripts/check_reproduction_outputs.sh full
+```
+
+## Docker Workflow
+
+If you prefer a containerized workflow:
+
+```bash
+./scripts/run_in_docker.sh full
+```
+
+This builds the local `Dockerfile`, mounts the repository into the container, and runs the same reproduction entrypoint.
+
 ## Output Files
 
 The helper scripts write the following outputs:
 
 - `logs/repro_environment.txt`: machine and toolchain information
 - `logs/reproduction_manifest.txt`: targets executed in the current reproduction run
+- `logs/reproduction_check.txt`: validation report for expected output files
 - `reluplex/test.txt`: smoke-test output
 - `logs/property*_summary.txt`: summary results for property experiments
 - `logs/*stats*.txt`: detailed statistics logs emitted during runs

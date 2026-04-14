@@ -112,6 +112,9 @@ for target in "${TARGETS[@]}"; do
     run_target "${target}"
 done
 
+"${SCRIPT_DIR}/check_reproduction_outputs.sh" "${TARGETS[@]}" | tee "${REPO_ROOT}/logs/reproduction_check.txt"
+
 echo "Reproduction run complete."
 echo "Environment log: logs/repro_environment.txt"
 echo "Manifest: logs/reproduction_manifest.txt"
+echo "Output check: logs/reproduction_check.txt"

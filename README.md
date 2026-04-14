@@ -49,6 +49,13 @@ For a one-command build, run:
 ./scripts/build_all.sh
 ```
 
+For a containerized environment, you can also build and run via Docker:
+
+```bash
+docker build -t leaky-reluplex .
+docker run --rm -it leaky-reluplex
+```
+
 The manual steps are:
 
 1. Build GLPK:
@@ -108,10 +115,22 @@ For the most direct reproduction path, run:
 ./scripts/reproduce_paper.sh full
 ```
 
+This generates:
+
+- `logs/repro_environment.txt`
+- `logs/reproduction_manifest.txt`
+- `logs/reproduction_check.txt`
+
 For a shorter selective run, for example:
 
 ```bash
 ./scripts/reproduce_paper.sh property1 property6 adversarial
+```
+
+To run the same workflow inside Docker:
+
+```bash
+./scripts/run_in_docker.sh full
 ```
 
 After finishing the build steps above, run experiments from the repository root:
