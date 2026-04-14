@@ -90,6 +90,28 @@ Examples:
 
 Logs and summaries are written under `logs/`.
 
+## Reproducing the Paper Experiments
+
+The repository includes helper scripts for the property checks used with the bundled ACAS Xu networks.
+
+After finishing the build steps above, run experiments from the repository root:
+
+```bash
+./scripts/run_property1.sh
+./scripts/run_property2.sh
+./scripts/run_property3.sh
+./scripts/run_property4.sh
+./scripts/run_property5.sh
+./scripts/run_property6.sh
+./scripts/run_property7.sh
+./scripts/run_property8.sh
+./scripts/run_property9.sh
+./scripts/run_property10.sh
+./scripts/run_adversarial.sh
+```
+
+Each script writes summary and statistics files into `logs/`. Most property scripts use a `12h` timeout per run.
+
 ## Notes
 
 - The primary documented build path is the original Makefile-based workflow.
@@ -105,6 +127,19 @@ Additional licensing notes:
 - neural-network files in `nnet/` are distributed under CC BY 4.0,
 - the project links against GLPK, which is GPL-licensed, so resulting usage and redistribution may be restricted in non-GPL-compatible settings.
 
-## Citation and Acknowledgements
+## Citation
 
-If you use this repository, please cite the original Reluplex work and acknowledge the upstream implementation by the Reluplex authors and contributors listed in `AUTHORS`.
+If you use this repository, please cite the accompanying paper:
+
+```bibtex
+@inproceedings{xu2020reluplex,
+  author    = {Jin Xu and Zishan Li and Bowen Du and Miaomiao Zhang and Jing Liu},
+  title     = {Reluplex made more practical: Leaky ReLU},
+  booktitle = {2020 IEEE Symposium on Computers and Communications (ISCC)},
+  pages     = {1--7},
+  year      = {2020},
+  doi       = {10.1109/ISCC50000.2020.9219587}
+}
+```
+
+Please also acknowledge the original Reluplex work and the upstream implementation by the Reluplex authors and contributors listed in `AUTHORS`.
