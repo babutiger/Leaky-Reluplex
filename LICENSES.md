@@ -8,9 +8,13 @@ The following repository-management and documentation files are available under 
 
 - `.gitignore`
 - `README.md`
+- `REPRODUCIBILITY.md`
 - `CITATION.cff`
 - `LICENSE-MIT`
 - `LICENSES.md`
+- `scripts/build_all.sh`
+- `scripts/record_environment.sh`
+- `scripts/reproduce_paper.sh`
 
 ## Reluplex-derived code and materials
 

@@ -43,6 +43,14 @@ You will typically need:
 
 GLPK is configured to install into the local repository at `glpk-4.60/installed`, not into a system directory.
 
+For a one-command build, run:
+
+```bash
+./scripts/build_all.sh
+```
+
+The manual steps are:
+
 1. Build GLPK:
 
 ```bash
@@ -94,6 +102,18 @@ Logs and summaries are written under `logs/`.
 
 The repository includes helper scripts for the property checks used with the bundled ACAS Xu networks.
 
+For the most direct reproduction path, run:
+
+```bash
+./scripts/reproduce_paper.sh full
+```
+
+For a shorter selective run, for example:
+
+```bash
+./scripts/reproduce_paper.sh property1 property6 adversarial
+```
+
 After finishing the build steps above, run experiments from the repository root:
 
 ```bash
@@ -111,6 +131,8 @@ After finishing the build steps above, run experiments from the repository root:
 ```
 
 Each script writes summary and statistics files into `logs/`. Most property scripts use a `12h` timeout per run.
+
+For a step-by-step artifact workflow, see [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
 ## Notes
 
