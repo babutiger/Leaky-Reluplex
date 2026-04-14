@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the associated paper below."
+title: "Leaky-Reluplex"
+type: software
+authors:
+  - family-names: Xu
+    given-names: Jin
+  - family-names: Li
+    given-names: Zishan
+  - family-names: Du
+    given-names: Bowen
+  - family-names: Zhang
+    given-names: Miaomiao
+  - family-names: Liu
+    given-names: Jing
+repository-code: "https://github.com/babutiger/Leaky-Reluplex"
+preferred-citation:
+  type: conference-paper
+  authors:
+    - family-names: Xu
+      given-names: Jin
+    - family-names: Li
+      given-names: Zishan
+    - family-names: Du
+      given-names: Bowen
+    - family-names: Zhang
+      given-names: Miaomiao
+    - family-names: Liu
+      given-names: Jing
+  title: "Reluplex made more practical: Leaky ReLU"
+  collection-title: "2020 IEEE Symposium on Computers and Communications (ISCC)"
+  year: 2020
+  start: 1
+  end: 7
+  doi: "10.1109/ISCC50000.2020.9219587"
+  url: "https://doi.org/10.1109/ISCC50000.2020.9219587"

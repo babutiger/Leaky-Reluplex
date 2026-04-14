@@ -120,7 +120,15 @@ Each script writes summary and statistics files into `logs/`. Most property scri
 
 ## License
 
-Source code in this repository is distributed under the modified BSD license inherited from Reluplex. See [LICENSE](LICENSE) and [COPYING](COPYING).
+This repository is not available under a single MIT license in its current form.
+
+The repository contains third-party code and data under multiple licenses:
+
+- Reluplex-derived source code under the modified BSD license inherited from Reluplex,
+- `nnet/` benchmark files under CC BY 4.0,
+- `glpk-4.60/` under the GNU General Public License.
+
+See [LICENSE](LICENSE) and [COPYING](COPYING) for the bundled license text.
 
 Additional licensing notes:
 
