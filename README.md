@@ -130,6 +130,8 @@ The repository contains third-party code and data under multiple licenses:
 
 See [LICENSE](LICENSE) and [COPYING](COPYING) for the bundled license text.
 
+For a file-by-file summary, see [LICENSES.md](LICENSES.md). The documentation and repository metadata added in this fork are available under [LICENSE-MIT](LICENSE-MIT), but the core solver, experiments, GLPK sources, and bundled benchmark data are not relicensed to MIT here.
+
 Additional licensing notes:
 
 - neural-network files in `nnet/` are distributed under CC BY 4.0,
