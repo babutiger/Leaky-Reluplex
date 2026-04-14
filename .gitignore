@@ -16,10 +16,16 @@ reluplex/test.txt
 
 glpk-4.60/**/*.o
 glpk-4.60/**/*.a
+glpk-4.60/**/*.lo
+glpk-4.60/**/*.la
 glpk-4.60/**/.libs/
+glpk-4.60/**/.deps/
 glpk-4.60/installed/
+glpk-4.60/config.h
 glpk-4.60/config.log
 glpk-4.60/config.status
+glpk-4.60/stamp-h1
 glpk-4.60/Makefile
+glpk-4.60/examples/glpsol
 glpk-4.60/src/Makefile
 glpk-4.60/examples/Makefile
